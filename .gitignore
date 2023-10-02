@@ -3,6 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Folders to ignore
+transcripts 
+test_audio
+downloaded_podcasts
+
 # C extensions
 *.so
 
