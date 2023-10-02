@@ -4,9 +4,11 @@ __pycache__/
 *$py.class
 
 # Folders to ignore
-transcripts 
 test_audio
 downloaded_podcasts
+output_youtube
+output_audio
+tmp 
 
 # C extensions
 *.so

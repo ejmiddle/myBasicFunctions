@@ -8,7 +8,7 @@ from get_transcripts import extract_youtube_video_id, get_video_transcript, get_
 from get_youtube_vid_urls import get_urls_from_channel
 
 # -------- Definitions --------------------------------
-rag_data = "RAG_data"
+rag_data = "output_youtube"
 
 #  ---- Energiesparkommissar Info
 channel_id = "UCfaiQVlrxIFnPkodykZ-zFw" # Energiesparkommissar
