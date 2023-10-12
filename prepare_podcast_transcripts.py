@@ -3,55 +3,28 @@ from dotenv import load_dotenv
 load_dotenv()
 import os
 import json
-import openai
-
-import tiktoken
+from deep_translator import (GoogleTranslator,
+                             ChatGptTranslator,
+                             DeeplTranslator)
+import spacy
+from spacy.language import Language
+from spacy_langdetect import LanguageDetector
 
 from  src.audio_functions import *
-
+from  src.text_manip_functions import *
 
 # input_folder = "output_audio/transcripts/ploetzblog"
 # rag_data = "output_audio/rag_data/ploetzblog"
 input_folder = "output_audio/transcripts/wingfoil_podcast"
 rag_data = "output_audio/rag_data/wingfoil_podcast"
 
-
-def num_tokens_from_string(string: str) -> int:
-    """Returns the number of tokens in a text string."""
-    encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
-    num_tokens = len(encoding.encode(string))
-    return num_tokens
-num_tokens_from_string("tiktoken is great!")
-
-def translate_text(text, source_language, target_language):
-    prompt = f"Translate the following text from '{source_language}' to '{target_language}': {text}"
-
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-16k",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant that translates text."},
-            {"role": "user", "content": prompt}
-        ],
-        max_tokens=3000,
-        n=1,
-        stop=None,
-        temperature=0.01,
-    )
-
-    translation = response.choices[0].message.content.strip()
-    return translation
-
-import spacy
-from spacy.language import Language
-from spacy_langdetect import LanguageDetector
+# # Spacy for detection
 spacy.prefer_gpu()
-
 @Language.factory("language_detector")
 def create_language_detector(nlp, name):
     return LanguageDetector(language_detection_function=None)
 nlp = spacy.load("en_core_web_sm")
 nlp.add_pipe('language_detector')
-# text = 'This is an english text.'
 # text = "Er lebt mit seinen Eltern und seiner Schwester in Berlin."
 # doc = nlp(text)
 # # document level language detection. Think of it like average language of the document!
@@ -60,10 +33,7 @@ nlp.add_pipe('language_detector')
 # for sent in doc.sents:
 #    print(sent, sent._.language)
 
-
-from deep_translator import (GoogleTranslator,
-                             ChatGptTranslator,
-                             DeeplTranslator)
+# # deep-translate for translation
 
 # text = "Er lebt mit seinen Eltern und seiner Schwester in Berlin."
 # translated = GoogleTranslator(source='auto', target='de').translate(text=text)
@@ -78,42 +48,6 @@ from deep_translator import (GoogleTranslator,
 # response = input("Do you really want to empty " + rag_data + "? (yes/no) ").lower()
 # if response == "yes":
 #     empty_folder(rag_data)
-
-def split_text(text, chunk_size=4900, overlap=100):
-    """
-    Split the text into overlapping chunks.
-
-    Parameters:
-    text (str): The text to be split
-    chunk_size (int): The maximum size of each chunk
-    overlap (int): The number of overlapping characters between each chunk
-    
-    Returns:
-    list: A list of strings representing each chunk
-    """
-    
-    chunks = []
-    text_length = len(text)
-    
-    for i in range(0, text_length, chunk_size-overlap):
-        # If it's the last chunk and it's smaller than the overlap
-        if i + chunk_size > text_length:
-            chunks.append(text[i:])
-        else:
-            chunks.append(text[i:i+chunk_size])
-            
-    return chunks
-
-
-
-# Example usage:
-# text = "This is a simple text to be split into overlapping chunks."
-# split_point = int(len(text)/2)
-# overlap = 12
-# chunk1, chunk2 = split_text(text, split_point, overlap)
-
-# print("First Chunk:", chunk1)
-# print("Second Chunk:", chunk2)
 
 
 for filename in os.listdir(input_folder):
