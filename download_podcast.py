@@ -48,10 +48,11 @@ if __name__ == '__main__':
     # RSS_URL = 'https://feeds.lagedernation.org/feeds/ldn-mp3.xml'
     # SAVE_FOLDER = './downloaded_podcasts/lage'
     
-    RSS_URL = 'https://feeds.megaphone.fm/newheights'
-    SAVE_FOLDER = './downloaded_podcasts/new_heights'
+    # RSS_URL = 'https://feeds.megaphone.fm/newheights'
+    # SAVE_FOLDER = './downloaded_podcasts/new_heights'
 
-
+    RSS_URL = 'https://fmcar8.podcaster.de/dgraffe.rss'
+    SAVE_FOLDER = './downloaded_podcasts/wingfoil_experience'
     
-    download_podcast(RSS_URL, SAVE_FOLDER, dl=True, n_dl = 2)
+    download_podcast(RSS_URL, SAVE_FOLDER, dl=True, n_dl = 1000)
 

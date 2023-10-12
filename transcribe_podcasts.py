@@ -12,9 +12,13 @@ import json
 from pydub import AudioSegment
 from  src.audio_functions import *
 
-input_folder = "downloaded_podcasts/ploetzblog_sel"
-output_folder = "output_audio/transcripts/ploetzblog"
+input_folder = "downloaded_podcasts/wingfoil_experience_selected"
+output_folder = "output_audio/transcripts/wingfoil_podcast"
 chunk_folder = "tmp" # temporary chunks to be passed to openai api
+
+response = input("Do you really want to empty " + output_folder + "? (yes/no) ").lower()
+if response == "yes":
+    empty_folder(output_folder)
 
 for filename in os.listdir(input_folder):
     if filename.endswith(".mp3"):
