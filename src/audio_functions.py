@@ -3,6 +3,7 @@ import os
 import shutil
 import openai
 import json
+import asyncio
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -58,24 +59,82 @@ def split_mp3(input_file, output_dir, seg_length=10*60*1000, overlap=10*1000):  
     print(f"Successfully split the audio into {i} chunks!")
 
 def get_transcript_for_dir(directory_path, output_dir, podcast_ident):
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     for filename in os.listdir(directory_path):
         if filename.endswith(".mp3"):
+            print("Processing ... ", filename)
             file_path = os.path.join(directory_path, filename)
-            print("Processing ... ", file_path)
             audio_file= open(file_path, "rb")
             transcript = openai.Audio.transcribe("whisper-1", audio_file, api_key=os.getenv("OPENAI_API_KEY"))
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
 
+            # --- Format and write outputs
             seg_ident = os.path.splitext(filename)[0]
             seg_dict = {
                 "seg_ident": seg_ident,
                 "podcast_ident": podcast_ident,
                 "text": transcript["text"]
             }
-
             filename = os.path.join(output_dir, podcast_ident + "_" + seg_ident + ".json")
             with open(filename, 'w') as f:
                 json.dump(seg_dict, f)
             print(f"Transcript saved to {filename}")
 
+async def get_transcript_for_file_async(directory_path, filename, output_dir, podcast_ident):
+    print("Processing ... ", filename)
+    file_path = os.path.join(directory_path, filename)
+    audio_file= open(file_path, "rb")
+    transcript = await openai.Audio.atranscribe("whisper-1", audio_file, api_key=os.getenv("OPENAI_API_KEY"))
+
+    # --- Format and write outputs
+    seg_ident = os.path.splitext(filename)[0]
+    seg_dict = {
+        "seg_ident": seg_ident,
+        "podcast_ident": podcast_ident,
+        "text": transcript["text"]
+    }
+    filename = os.path.join(output_dir, podcast_ident + "_" + seg_ident + ".json")
+    with open(filename, 'w') as f:
+        json.dump(seg_dict, f)
+    print(f"Transcript saved to {filename}")
+    return filename
+
+async def get_transcript_for_dir_async(directory_path, output_dir, podcast_ident):
+    if not os.path.exists(output_dir):
+        print("Creating output dir ... ")
+        os.makedirs(output_dir)
+
+    tasks = []  # Creating an empty list to hold tasks
+    for filename in os.listdir(directory_path):
+        if filename.endswith(".mp3"):
+            task = asyncio.create_task(
+                get_transcript_for_file_async(directory_path, filename, output_dir, podcast_ident)
+            )  # Creating a task
+            tasks.append(task)  # Appending the task to the list
+    
+    print("Tasks created ... ")
+
+    results = await asyncio.gather(*tasks)
+    print("Results: ", results)
+
+    return results
+
+
+# async def get_transcript_for_dir_async(directory_path, output_dir, podcast_ident):
+#     if not os.path.exists(output_dir):
+#         print("Creating output dir ... ")
+#         os.makedirs(output_dir)
+
+#     tasks = []  # Creating an empty list to hold tasks
+#     for filename in os.listdir(directory_path):
+#         if filename.endswith(".mp3"):
+#             # task = asyncio.run(get_transcript_for_file_async(directory_path, filename, output_dir, podcast_ident))            
+#             task = asyncio.get_transcript_for_file_async(directory_path, filename, output_dir, podcast_ident)  # Creating a task
+#             tasks.append(task)  # Appending the task to the list    
+#     print("Tasks created ... ")
+
+#     results = await asyncio.gather(*tasks)
+#     print("Results: ", results)
+
+#     return results

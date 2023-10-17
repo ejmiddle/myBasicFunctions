@@ -16,8 +16,13 @@ from  src.text_manip_functions import *
 # rag_data = "output_audio/rag_data/ploetzblog"
 # input_folder = "output_audio/transcripts/wingfoil_podcast"
 # rag_data = "output_audio/rag_data/wingfoil_podcast"
-input_folder = "output_audio/transcripts/current_selection"
-rag_data = "output_audio/rag_data/critical_discussion"
+# input_folder = "output_audio/transcripts/current_selection"
+# rag_data = "output_audio/rag_data/critical_discussion"
+
+input_folder = "output_audio/transcripts/tim_wendelboe"
+rag_data = "output_audio/rag_data/tim_wendelboe"
+
+TRANSLATE_EN = False
 
 # # pdm run python -m spacy download en_core_web_sm
 # # Spacy for detection
@@ -60,18 +65,19 @@ for filename in os.listdir(input_folder):
 
         text = pod_dict["text"]
         doc = nlp(text)
-        print(doc._.language)
-        if doc._.language["language"] == "en":
-            # text = translate_text(text, "english", "german")
-            chunks = split_text(text, chunk_size=4900, overlap=15)
-            text = ""
-            for i, chunk in enumerate(chunks):
-                print(f"chunk {i+1}:")
-                text += "\n" + GoogleTranslator(source='auto', target='de').translate(text=chunk)
-            print(filename)
-            # print(num_tokens_from_string(text))
-            # break
-        print(pod_dict)
+        if TRANSLATE_EN:
+            print(doc._.language)
+            if doc._.language["language"] == "en":
+                # text = translate_text(text, "english", "german")
+                chunks = split_text(text, chunk_size=4900, overlap=15)
+                text = ""
+                for i, chunk in enumerate(chunks):
+                    print(f"chunk {i+1}:")
+                    text += "\n" + GoogleTranslator(source='auto', target='de').translate(text=chunk)
+                print(filename)
+                # print(num_tokens_from_string(text))
+                # break
+        # print(pod_dict)
         fileout = os.path.join(rag_data, pod_dict["podcast_ident"] + '_' + pod_dict["seg_ident"] + '.txt' )
         fileout = fileout.replace(" ","_")
         fileout = fileout.replace("_-_","_")
