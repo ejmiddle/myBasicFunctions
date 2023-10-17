@@ -35,7 +35,7 @@ def empty_folder(path):
             print(f"Failed to delete {file_path}. Reason: {e}")
 
 
-def split_mp3(input_file, output_dir, chunk_length=10*60*1000, overlap=10*1000):  # overlap is set to 10 seconds
+def split_mp3(input_file, output_dir, seg_length=10*60*1000, overlap=10*1000):  # overlap is set to 10 seconds
     # Load the audio file
     audio = AudioSegment.from_mp3(input_file)
     
@@ -48,16 +48,16 @@ def split_mp3(input_file, output_dir, chunk_length=10*60*1000, overlap=10*1000):
     i = 0
     start_time = 0
     while start_time < len(audio):
-        end_time = start_time + chunk_length
+        end_time = start_time + seg_length
         chunk = audio[start_time:end_time]
-        chunk.export(f"{output_dir}/chunk_{i}.mp3", format="mp3")
+        chunk.export(f"{output_dir}/seg_{i}.mp3", format="mp3")
         
-        start_time += chunk_length - overlap
+        start_time += seg_length - overlap
         i += 1
 
     print(f"Successfully split the audio into {i} chunks!")
 
-def get_transcript_for_dir(directory_path, output_dir, ident):
+def get_transcript_for_dir(directory_path, output_dir, podcast_ident):
     for filename in os.listdir(directory_path):
         if filename.endswith(".mp3"):
             file_path = os.path.join(directory_path, filename)
@@ -67,15 +67,15 @@ def get_transcript_for_dir(directory_path, output_dir, ident):
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
 
-            chunk_ident = os.path.splitext(filename)[0]
-            chunk_dict = {
-            "chunk_ident": chunk_ident,
-            "ident": ident,
-            "text": transcript["text"]
+            seg_ident = os.path.splitext(filename)[0]
+            seg_dict = {
+                "seg_ident": seg_ident,
+                "podcast_ident": podcast_ident,
+                "text": transcript["text"]
             }
 
-            filename = os.path.join(output_dir, ident + "_" + chunk_ident + ".json")
+            filename = os.path.join(output_dir, podcast_ident + "_" + seg_ident + ".json")
             with open(filename, 'w') as f:
-                json.dump(chunk_dict, f)
+                json.dump(seg_dict, f)
             print(f"Transcript saved to {filename}")
 
